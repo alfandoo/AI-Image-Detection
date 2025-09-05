@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Image Detector</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- App CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="bg-white text-slate-900 hero-gradient">
+    <!-- SSR hydrate data (optional) -->
+    <script id="SSR_DATA" type="application/json">
+      {{ result|tojson|safe if result else "null" }}
+    </script>
+
+    <!-- ===== SCREEN: LANDING ===== -->
+    <section id="screen-landing" class="min-h-screen flex items-center">
+      <div class="mx-auto w-full max-w-6xl px-4 md:px-6 py-16">
+        <header class="text-center max-w-3xl mx-auto">
+          <h1
+            class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
+          >
+            AI vs Human Image Detection
+          </h1>
+          <p class="mt-3 text-slate-600">
+            This model was trained using
+            <span class="font-semibold"
+              >ShutterStock Dataset for AI vs Human-Generated Images</span
+            >
+            (Kaggle). Detecting whether a photo is likely to be
+            <em>AI-generated</em> atau <em>Human-taken</em> — without watermark.
+          </p>
+          <p class="mt-2 text-xs text-slate-500">
+            Class: <span class="font-medium">AI</span> ·
+            <span class="font-medium">Human</span>. Source: Kaggle (ShutterStock
+            dataset).
+          </p>
+        </header>
+
+        <div
+          class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-10 mt-12"
+        >
+          <!-- Preview (clickable) -->
+          <button
+            id="openPickerFromImage"
+            type="button"
+            class="dropzone relative rounded-2xl overflow-hidden group focus:outline-none focus:ring-4 focus:ring-indigo-300"
+          >
+            <img
+              id="previewImg"
+              alt="Preview"
+              class="w-full aspect-[4/3] object-cover"
+              src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1600&auto=format&fit=crop"
+            />
+            <div
+              class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"
+            ></div>
+            <div
+              class="absolute right-3 bottom-3 glass shadow-soft rounded-xl px-3 py-2 text-xs font-semibold text-slate-700"
+            >
+              Click to choose an image
+            </div>
+          </button>
+
+          <!-- Arrow -->
+          <div class="hidden lg:flex items-center justify-center">
+            <div
+              class="w-10 h-10 rounded-full bg-slate-900/90 text-white grid place-content-center shadow-lg"
+            >
+              →
+            </div>
+          </div>
+
+          <!-- Code-like card (cosmetic) -->
+          <div class="code-card p-5 md:p-6">
+            <div class="text-sm leading-relaxed font-mono">
+              <div>
+                "<span class="text-emerald-300">status</span>": "<span
+                  class="text-emerald-300"
+                  >ready</span
+                >",
+              </div>
+              <div>
+                "<span class="text-indigo-300">model</span>": "Custom CNN
+                (TensorFlow/Keras)",
+              </div>
+              <div>
+                "<span class="text-indigo-300">dataset</span>": { "name":
+                "ShutterStock AI vs Human-Gen", "source": "Kaggle", "link":
+                "https://www.kaggle.com/datasets/shreyasraghav/shutterstock-dataset-for-ai-vs-human-gen-image",
+                "classes": ["AI", "Human"] },
+              </div>
+              <div>
+                "<span class="text-indigo-300">prediction</span>": {
+                "ai_probability": "<span class="text-pink-300">0.99</span>",
+                "label": "<span class="text-emerald-300">AI</span>" }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+          <button
+            id="checkImageBtn"
+            class="btn-primary px-5 py-3 rounded-xl text-sm font-semibold shadow-soft focus:outline-none focus:ring-4 focus:ring-indigo-300"
+          >
+            CHECK IMAGE
+          </button>
+
+          <!-- Download test data -->
+          <a
+            id="downloadTestBtn"
+            href="{{ url_for('static', filename='test_data.rar') }}"
+            download
+            class="px-5 py-3 rounded-xl text-sm font-semibold shadow-soft border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+            aria-label="Download test data"
+          >
+            DOWNLOAD TEST DATA
+          </a>
+        </div>
+
+        <!-- Hidden file input + fallback form (noscript) -->
+        <input
+          id="fileInput"
+          name="image"
+          type="file"
+          accept="image/*"
+          class="hidden"
+        />
+        <form
+          id="fallbackForm"
+          action="/predict"
+          method="POST"
+          enctype="multipart/form-data"
+          class="hidden"
+        >
+          <input type="file" name="image" />
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== SCREEN: RESULT ===== -->
+    <section id="screen-result" class="hidden min-h-screen">
+      <div class="mx-auto w-full max-w-6xl px-4 md:px-6 py-14">
+        <header class="flex items-center justify-between gap-6">
+          <h2 class="text-2xl sm:text-3xl font-extrabold">
+            Detect AI-generated images at scale
+          </h2>
+          <div class="flex items-center gap-3">
+            <button
+              id="tryAnotherBtn"
+              class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-medium bg-white hover:bg-slate-50"
+            >
+              Try another
+            </button>
+            <button
+              id="checkAgainBtn"
+              class="btn-primary px-4 py-2 rounded-xl font-semibold"
+            >
+              Re-check
+            </button>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-10">
+          <!-- Left: chosen image -->
+          <div>
+            <div class="rounded-2xl overflow-hidden shadow-soft bg-white">
+              <img
+                id="resultImg"
+                alt="Selected"
+                class="w-full aspect-[4/3] object-cover"
+                src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1600&auto=format&fit=crop"
+              />
+            </div>
+            <p class="text-center text-sm text-slate-500 mt-2">
+              Click image to choose another
+            </p>
+          </div>
+
+          <!-- Right: results dashboard -->
+          <div class="bg-white rounded-2xl p-6 shadow-soft">
+            <div class="flex items-center justify-between">
+              <div>
+                <div
+                  id="headlineVerdict"
+                  class="text-xl md:text-2xl font-extrabold text-emerald-700"
+                >
+                  Not likely to be AI-generated or Deepfake
+                </div>
+                <div class="text-slate-500 text-sm mt-1">
+                  Model insight summary
+                </div>
+              </div>
+              <div
+                id="scorePill"
+                class="chip score-good text-white text-2xl leading-none"
+              >
+                3%
+              </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5">
+              <!-- Column A -->
+              <div>
+                <div class="font-semibold text-slate-900 mb-1">GenAI</div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="progress-rail w-full">
+                    <div id="bar-genai" class="progress-bar ok w-0"></div>
+                  </div>
+                  <div
+                    id="val-genai"
+                    class="text-sm text-slate-600 w-12 text-right"
+                  >
+                    0%
+                  </div>
+                </div>
+
+                <div class="font-semibold text-slate-900 mb-1">
+                  Face manipulation
+                </div>
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="progress-rail w-full">
+                    <div id="bar-facemanip" class="progress-bar ok w-0"></div>
+                  </div>
+                  <div
+                    id="val-facemanip"
+                    class="text-sm text-slate-600 w-12 text-right"
+                  >
+                    0%
+                  </div>
+                </div>
+
+                <div class="font-semibold text-slate-900">
+                  Diffusion
+                  <span class="text-slate-400 text-xs align-middle"
+                    >(by model)</span
+                  >
+                </div>
+                <div id="diffusionList" class="mt-2 space-y-2"></div>
+              </div>
+
+              <!-- Column B -->
+              <div>
+                <div class="font-semibold text-slate-900">
+                  GAN
+                  <span class="text-slate-400 text-xs align-middle"
+                    >(by model)</span
+                  >
+                </div>
+                <div id="ganList" class="mt-2 space-y-2"></div>
+
+                <div class="font-semibold text-slate-900 mt-6">Other</div>
+                <div id="otherList" class="mt-2 space-y-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 text-center text-slate-500 text-xs">
+          Powered by AI Image Detector
+          <span class="underline cursor-pointer" id="backToHome"
+            >Back to home</span
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TOAST / LOADING ===== -->
+    <div
+      id="toast"
+      class="fixed top-4 inset-x-0 mx-auto w-fit px-4 py-2 rounded-xl shadow-soft text-sm hidden bg-slate-900 text-white"
+    >
+      Uploading & analyzing…
+    </div>
+
+    <!-- App JS -->
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
