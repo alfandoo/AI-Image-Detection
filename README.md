@@ -1,65 +1,65 @@
 # 🖼️ AI Image Detection
 
-Proyek ini adalah **AI Image Detector** untuk mengklasifikasikan gambar apakah dibuat oleh **manusia** atau **AI-generated**.  
-Model dilatih menggunakan **Custom CNN** dengan tambahan analisis kualitas gambar (blur, noise, resolusi) serta interpretabilitas menggunakan **Grad-CAM**.
+This portfolio project is an **AI Image Detector** that classifies whether an image is created by a **human** or **AI-generated**.  
+The model was trained using a **Custom CNN**, with additional image quality analysis (blur, noise, resolution) and interpretability powered by **Grad-CAM**.
 
 ---
 
-## 🚀 Fitur Utama
+## 🚀 Key Features
 
-- 🔍 **Deteksi AI vs Human Image**
-- 📊 **Visualisasi hasil** dengan confidence score
-- ⚡ **Deploy via Docker & Hugging Face Spaces**
-- 🎨 **UI/UX berbasis TailwindCSS** (landing page & result screen)
+- 🔍 **Detection of AI vs Human Images**
+- 📊 **Prediction visualization** with confidence score
+- ⚡ **Deployment via Docker & Hugging Face Spaces**
+- 🎨 **UI/UX built with TailwindCSS** (landing page & result screen)
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Python** (TensorFlow/Keras, OpenCV, NumPy, Pandas)
-- **Flask API** untuk backend
-- **Docker** untuk containerization
-- **TailwindCSS** untuk frontend
-- **Hugging Face Spaces** untuk deployment → [AI-Image-Detection](https://huggingface.co/spaces/alfando/AI-Image-Detection)
+- **Flask API** for backend
+- **Docker** for containerization
+- **TailwindCSS** for frontend
+- **Hugging Face Spaces** for deployment → [AI-Image-Detection](https://huggingface.co/spaces/alfando/AI-Image-Detection)
 
 ---
 
-## 🔧 Teknik yang Digunakan
+## 🔧 Techniques Applied
 
 - **Data Preparation**
 
-  - Dataset gambar + anotasi CSV dari Google Drive
-  - Split data: 80% training, 20% validation
+  - Image dataset + CSV annotations loaded from Google Drive
+  - Split into 80% training and 20% validation
 
 - **Data Augmentation**
 
-  - Normalisasi piksel (`rescale=1./255`)
-  - Augmentasi: rotasi, shift, shear, zoom, horizontal flip
+  - Pixel normalization (`rescale=1./255`)
+  - Augmentations: rotation, shift, shear, zoom, horizontal flip
 
 - **Modeling (CNN)**
 
-  - 3 lapisan **Conv2D + MaxPooling** (32 → 64 → 128 filter)
+  - 3 layers of **Conv2D + MaxPooling** (32 → 64 → 128 filters)
   - **Flatten → Dense(512, ReLU)**
-  - **Output Dense(2, Softmax)** → klasifikasi Human vs AI
+  - **Output Dense(2, Softmax)** → Human vs AI classification
 
 - **Training**
 
   - Optimizer: **Adam**
   - Loss: **Categorical Crossentropy**
-  - Epoch: 40
+  - Epochs: 40
   - Batch size: 32
 
-- **Evaluasi**
-  - Plot kurva **akurasi & loss**
+- **Evaluation**
+  - Accuracy & loss curves
   - **Classification report** (precision, recall, f1-score)
-  - **Confusion matrix** per kelas (Human vs AI)
+  - **Confusion matrix** per class (Human vs AI)
 
 ---
 
-## 📊 Hasil Akhir
+## 📊 Final Results
 
-- **Akurasi training:** ~98%
-- **Akurasi validasi:** ~91%
+- **Training accuracy:** ~98%
+- **Validation accuracy:** ~91%
 - **Per-class accuracy:**
   - Human → 0.90
   - AI → 0.92
