@@ -1,12 +1,3 @@
----
-title: AI Image Detection
-emoji: 💻
-colorFrom: red
-colorTo: indigo
-sdk: docker
-pinned: false
----
-
 # 🖼️ AI Image Detection
 
 Proyek ini adalah **AI Image Detector** untuk mengklasifikasikan gambar apakah dibuat oleh **manusia** atau **AI-generated**.  
@@ -30,6 +21,6 @@ Model dilatih menggunakan **Custom CNN** dengan beberapa fitur tambahan seperti 
 - **Flask API** untuk backend
 - **Docker** untuk containerization
 - **TailwindCSS** untuk frontend
-- **Hugging Face Spaces** sebagai deployment platform
+- **Hugging Face Spaces** sebagai deployment platform link: https://huggingface.co/spaces/alfando/AI-Image-Detection
 
 ---
