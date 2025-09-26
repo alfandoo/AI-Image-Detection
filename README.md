@@ -1,7 +1,7 @@
 # 🖼️ AI Image Detection
 
 This portfolio project is an **AI Image Detector** that classifies whether an image is created by a **human** or **AI-generated**.  
-The model was trained using a **Custom CNN**, with additional image quality analysis (blur, noise, resolution) and interpretability powered by **Grad-CAM**.
+The model was trained using a **Custom CNN**, with additional image quality analysis (blur, noise, resolution).
 
 ---
 
